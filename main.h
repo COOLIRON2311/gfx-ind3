@@ -35,6 +35,10 @@ bool music_playing;
 vector<Object> objects;
 array<GLuint, 1> Programs;
 array<GLuint, 7> textures;
+vector<Object*> enemy_tanks;
+vector<Object*> trees;
+vector<Object*> rocks;
+vector<Object*> barrels;
 PlayerTank* tonk;
 
 GLint Phong_coord;

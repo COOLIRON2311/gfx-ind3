@@ -55,6 +55,7 @@ void Init()
 int main()
 {
 	setlocale(LC_ALL, "Russian");
+	srand(time(NULL));
 	sf::Window window(sf::VideoMode(1000, 1000), "World of Tonks", sf::Style::Default, sf::ContextSettings(24));
 	SetIcon(window);
 	window.setVerticalSyncEnabled(true); // Вертикальная синхронизация
@@ -185,12 +186,56 @@ void InitVBO()
 	LoadObject(5, "models/Stone.obj");
 	// Player tank
 	tonk = new PlayerTank(objects[1]);
-	//tonk->ry = -90;
+
 	// Christmas tree
 	objects[2].dx = 10;
 	objects[2].dz = 10;
 	for (auto& obj : objects)
 		obj.Update();
+	
+	// Enemy tanks
+	for (int i = 0; i < 3; i++)
+	{
+		Object* o = objects[1].copy();
+		o->dx = rand() % 20;
+		o->dz = rand() % 20;
+		o->ry = rand() % 360;
+		o->Update();
+		enemy_tanks.push_back(o);
+	}
+
+	// Barrels
+	for (int i = 0; i < 3; i++)
+	{
+		Object* o = objects[3].copy();
+		o->dx = rand() % 20;
+		o->dz = rand() % 20;
+		o->ry = rand() % 360;
+		o->Update();
+		barrels.push_back(o);
+	}
+	
+	// Trees
+	for (int i = 0; i < 3; i++)
+	{
+		Object* o = objects[4].copy();
+		o->dx = rand() % 20;
+		o->dz = rand() % 20;
+		o->ry = rand() % 360;
+		o->Update();
+		trees.push_back(o);
+	}
+
+	// Rocks
+	for (int i = 0; i < 3; i++)
+	{
+		Object* o = objects[5].copy();
+		o->dx = rand() % 20;
+		o->dz = rand() % 20;
+		o->ry = rand() % 360;
+		o->Update();
+		rocks.push_back(o);
+	}
 }
 
 void InitTextures()
@@ -365,6 +410,115 @@ void Draw(sf::Window& window)
 	glDisableVertexAttribArray(Phong_texcoord);
 	glDisableVertexAttribArray(Phong_normal);
 	glUseProgram(0); // Отключаем шейдерную программу
+
+
+	// Enemy tanks
+	for (int i = 0; i < enemy_tanks.size(); i++)
+	{
+		glUseProgram(Programs[0]);
+		tex_loc = glGetUniformLocation(Programs[0], "tex");
+		pl.Load(Programs[0]);
+		dl.Load(Programs[0]);
+		sl.Load(Programs[0]);
+		mat.Load(Programs[0]);
+		glUniformMatrix4fv(Phong_mvp, 1, GL_FALSE, glm::value_ptr(cam.MVP()));
+		glUniform3fv(Phong_viewPos, 1, glm::value_ptr(cam.Pos));
+		glUniform1i(tex_loc, 6);
+		glEnableVertexAttribArray(Phong_coord);
+		glEnableVertexAttribArray(Phong_texcoord);
+		glEnableVertexAttribArray(Phong_normal);
+		glBindBuffer(GL_ARRAY_BUFFER, enemy_tanks[i]->id);
+		glVertexAttribPointer(Phong_coord, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)0);
+		glVertexAttribPointer(Phong_texcoord, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
+		glVertexAttribPointer(Phong_normal, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)(5 * sizeof(GLfloat)));
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		glDrawArrays(GL_TRIANGLES, 0, enemy_tanks[i]->size());
+		glDisableVertexAttribArray(Phong_coord);
+		glDisableVertexAttribArray(Phong_texcoord);
+		glDisableVertexAttribArray(Phong_normal);
+		glUseProgram(0); // Отключаем шейдерную программу
+	}
+
+	// Barrels
+	for (int i = 0; i < barrels.size(); i++)
+	{
+		glUseProgram(Programs[0]);
+		tex_loc = glGetUniformLocation(Programs[0], "tex");
+		pl.Load(Programs[0]);
+		dl.Load(Programs[0]);
+		sl.Load(Programs[0]);
+		mat.Load(Programs[0]);
+		glUniformMatrix4fv(Phong_mvp, 1, GL_FALSE, glm::value_ptr(cam.MVP()));
+		glUniform3fv(Phong_viewPos, 1, glm::value_ptr(cam.Pos));
+		glUniform1i(tex_loc, 3);
+		glEnableVertexAttribArray(Phong_coord);
+		glEnableVertexAttribArray(Phong_texcoord);
+		glEnableVertexAttribArray(Phong_normal);
+		glBindBuffer(GL_ARRAY_BUFFER, barrels[i]->id);
+		glVertexAttribPointer(Phong_coord, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)0);
+		glVertexAttribPointer(Phong_texcoord, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
+		glVertexAttribPointer(Phong_normal, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)(5 * sizeof(GLfloat)));
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		glDrawArrays(GL_TRIANGLES, 0, barrels[i]->size());
+		glDisableVertexAttribArray(Phong_coord);
+		glDisableVertexAttribArray(Phong_texcoord);
+		glDisableVertexAttribArray(Phong_normal);
+		glUseProgram(0); // Отключаем шейдерную программу
+	}
+
+	// Trees
+	for (int i = 0; i < trees.size(); i++)
+	{
+		glUseProgram(Programs[0]);
+		tex_loc = glGetUniformLocation(Programs[0], "tex");
+		pl.Load(Programs[0]);
+		dl.Load(Programs[0]);
+		sl.Load(Programs[0]);
+		mat.Load(Programs[0]);
+		glUniformMatrix4fv(Phong_mvp, 1, GL_FALSE, glm::value_ptr(cam.MVP()));
+		glUniform3fv(Phong_viewPos, 1, glm::value_ptr(cam.Pos));
+		glUniform1i(tex_loc, 4);
+		glEnableVertexAttribArray(Phong_coord);
+		glEnableVertexAttribArray(Phong_texcoord);
+		glEnableVertexAttribArray(Phong_normal);
+		glBindBuffer(GL_ARRAY_BUFFER, trees[i]->id);
+		glVertexAttribPointer(Phong_coord, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)0);
+		glVertexAttribPointer(Phong_texcoord, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
+		glVertexAttribPointer(Phong_normal, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)(5 * sizeof(GLfloat)));
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		glDrawArrays(GL_TRIANGLES, 0, trees[i]->size());
+		glDisableVertexAttribArray(Phong_coord);
+		glDisableVertexAttribArray(Phong_texcoord);
+		glDisableVertexAttribArray(Phong_normal);
+		glUseProgram(0); // Отключаем шейдерную программу
+	}
+
+	// Rocks
+	for (int i = 0; i < rocks.size(); i++)
+	{
+		glUseProgram(Programs[0]);
+		tex_loc = glGetUniformLocation(Programs[0], "tex");
+		pl.Load(Programs[0]);
+		dl.Load(Programs[0]);
+		sl.Load(Programs[0]);
+		mat.Load(Programs[0]);
+		glUniformMatrix4fv(Phong_mvp, 1, GL_FALSE, glm::value_ptr(cam.MVP()));
+		glUniform3fv(Phong_viewPos, 1, glm::value_ptr(cam.Pos));
+		glUniform1i(tex_loc, 5);
+		glEnableVertexAttribArray(Phong_coord);
+		glEnableVertexAttribArray(Phong_texcoord);
+		glEnableVertexAttribArray(Phong_normal);
+		glBindBuffer(GL_ARRAY_BUFFER, rocks[i]->id);
+		glVertexAttribPointer(Phong_coord, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)0);
+		glVertexAttribPointer(Phong_texcoord, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
+		glVertexAttribPointer(Phong_normal, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)(5 * sizeof(GLfloat)));
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		glDrawArrays(GL_TRIANGLES, 0, rocks[i]->size());
+		glDisableVertexAttribArray(Phong_coord);
+		glDisableVertexAttribArray(Phong_texcoord);
+		glDisableVertexAttribArray(Phong_normal);
+		glUseProgram(0); // Отключаем шейдерную программу
+	}
 	
 
 	checkOpenGLerror(); // Проверяем на ошибки

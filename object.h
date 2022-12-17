@@ -97,7 +97,9 @@ public:
 
 	Object* copy()
 	{
-		return new Object(id, vertices, dx, dz, ry);
+		GLuint new_id;
+		glGenBuffers(1, &new_id); // Генерируем вершинный буфер
+		return new Object(new_id, vertices, dx, dz, ry);
 	}
 
 	void Update()
