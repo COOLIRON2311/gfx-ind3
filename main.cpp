@@ -80,19 +80,23 @@ int main()
 				// Rotation
 				if (event.key.code == sf::Keyboard::Up)
 				{
-					cam.PitchPlus();
+					cam.FWD(tonk->dir);
+					tonk->MoveForward();
 				}
 				if (event.key.code == sf::Keyboard::Down)
 				{
-					cam.PitchMinus();
+					cam.BWD(tonk->dir);
+					tonk->MoveBackward();
 				}
 				if (event.key.code == sf::Keyboard::Right)
 				{
-					cam.YawPlus();
+					tonk->RotateRight();
+					cam.RotRight(tonk->center, tonk->dir);
 				}
 				if (event.key.code == sf::Keyboard::Left)
 				{
-					cam.YawMinus();
+					tonk->RotateLeft();
+					cam.RotLeft(tonk->center, tonk->dir);
 				}
 
 				// Movement
@@ -180,7 +184,8 @@ void InitVBO()
 	LoadObject(4, "models/Tree.obj");
 	LoadObject(5, "models/Stone.obj");
 	// Player tank
-	objects[1].ry = -90;
+	tonk = new PlayerTank(objects[1]);
+	//tonk->ry = -90;
 	// Christmas tree
 	objects[2].dx = 10;
 	objects[2].dz = 10;
@@ -326,12 +331,12 @@ void Draw(sf::Window& window)
 	glEnableVertexAttribArray(Phong_coord);
 	glEnableVertexAttribArray(Phong_texcoord);
 	glEnableVertexAttribArray(Phong_normal);
-	glBindBuffer(GL_ARRAY_BUFFER, objects[1].id);
+	glBindBuffer(GL_ARRAY_BUFFER, tonk->id);
 	glVertexAttribPointer(Phong_coord, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)0);
 	glVertexAttribPointer(Phong_texcoord, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
 	glVertexAttribPointer(Phong_normal, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)(5 * sizeof(GLfloat)));
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glDrawArrays(GL_TRIANGLES, 0, objects[1].size());
+	glDrawArrays(GL_TRIANGLES, 0, tonk->size());
 	glDisableVertexAttribArray(Phong_coord);
 	glDisableVertexAttribArray(Phong_texcoord);
 	glDisableVertexAttribArray(Phong_normal);

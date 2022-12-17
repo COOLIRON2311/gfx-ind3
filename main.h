@@ -35,6 +35,7 @@ bool music_playing;
 vector<Object> objects;
 array<GLuint, 1> Programs;
 array<GLuint, 7> textures;
+PlayerTank* tonk;
 
 GLint Phong_coord;
 GLint Phong_texcoord;

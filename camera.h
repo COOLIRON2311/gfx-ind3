@@ -7,6 +7,7 @@ class Camera
 {
 	float pitch = 0.0f;
 	float yaw = -90.0f;
+	const glm::vec3 offset = glm::vec3(0.0f, 3.0f, 6.0f);
 public:
 	glm::vec3 Pos;
 	glm::vec3 Front;
@@ -87,7 +88,7 @@ public:
 
 	void Reset()
 	{	
-		Pos = glm::vec3(0.0f, 3.0f, 6.0f);
+		Pos = offset;
 		Front = glm::vec3(0.0f, 0.0f, -1.0f);
 		Up = glm::vec3(0.0f, 1.0f, 0.0f);
 		view = glm::lookAt(Pos, Pos + Front, Up);
@@ -118,5 +119,35 @@ public:
 	glm::mat4 Proj()
 	{
 		return proj;
+	}
+
+	void FWD(const glm::vec3& td)
+	{
+		model = glm::translate(model, glm::vec3(0.1f * td.x, 0.0f, 0.1f * td.z));
+	}
+	
+	void BWD(const glm::vec3& td)
+	{
+		model = glm::translate(model, glm::vec3(-0.1f * td.x, 0.0f, -0.1f * td.z));
+	}
+
+	void RotRight(const glm::vec3 tc, const glm::vec3& td)
+	{
+		model = glm::translate(model, glm::vec3(Pos.x, 0.0f, Pos.z));
+		model = glm::rotate(model, glm::radians(1.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+		model = glm::translate(model, glm::vec3(-Pos.x, 0.0f, -Pos.z));
+		Pos.x = tc.x;
+		Pos.y = offset.y;
+		Pos.z = tc.z;
+	}
+	
+	void RotLeft(const glm::vec3 tc, const glm::vec3& td)
+	{
+		model = glm::translate(model, glm::vec3(Pos.x, 0.0f, Pos.z));
+		model = glm::rotate(model, glm::radians(-1.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+		model = glm::translate(model, glm::vec3(-Pos.x, 0.0f, -Pos.z));
+		Pos.x = tc.x;
+		Pos.y = offset.y;
+		Pos.z = tc.z;
 	}
 };
