@@ -19,6 +19,7 @@ uniform struct DirLight {
 } dirl;
 
 uniform struct SpotLight {
+    bool enabled;
     vec3 pos;
     vec3 direction;
     vec3 ambient;
@@ -87,7 +88,7 @@ void main()
     float theta = dot(lightDir, -normalize(spotl.direction));
     vec3 r3 = vec3(0.0f);
 
-    if(theta > cos(radians(spotl.cutoff))) {
+    if(spotl.enabled && theta > cos(radians(spotl.cutoff))) {
         lightReflDir = reflect(-lightDir, norm2);
 
         NdotL = max(dot(norm2, lightDir), 0);

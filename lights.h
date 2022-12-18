@@ -72,6 +72,7 @@ struct DirLight {
 };
 
 struct SpotLight {
+	bool enabled;
 	glm::vec3 pos;
 	glm::vec3 direction;
 	glm::vec3 ambient;
@@ -83,6 +84,7 @@ struct SpotLight {
 	void Load(GLuint program)
 	{
 		std::string prefix = "spotl.";
+		glUniform1i(glGetUniformLocation(program, (prefix + "enabled").c_str()), enabled);
 		glUniform3fv(glGetUniformLocation(program, (prefix + "pos").c_str()), 1, glm::value_ptr(pos));
 		glUniform3fv(glGetUniformLocation(program, (prefix + "direction").c_str()), 1, glm::value_ptr(direction));
 		glUniform3fv(glGetUniformLocation(program, (prefix + "ambient").c_str()), 1, glm::value_ptr(ambient));

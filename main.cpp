@@ -16,6 +16,7 @@ void Init()
 	dl.specular = glm::vec3(0.5f);
 
 	// Spot light
+	sl.enabled = true;
 	sl.pos = glm::vec3(-5.0f, -8.37f, -5.0f);
 	sl.direction = glm::vec3(1.0f);
 	sl.ambient = glm::vec3(1.0f);
@@ -152,6 +153,10 @@ int main()
 						bg.play();
 					else
 						bg.pause();
+				}
+				if (event.key.code == sf::Keyboard::LAlt)
+				{
+					sl.enabled = !sl.enabled;
 				}
 			}
 
