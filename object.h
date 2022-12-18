@@ -142,7 +142,6 @@ public:
 
 class PlayerTank
 {
-	const GLfloat speed = 0.1f;
 	void setCenter()
 	{
 		float x = 0.0f;
@@ -168,6 +167,8 @@ public:
 	glm::vec4 dir;
 	glm::vec3 center;
 	vector<Vertex> vertices;
+	const float speed = 0.2f;
+	const float rotspeed = 2.0f;
 	
 	PlayerTank(Object& obj)
 	{
@@ -201,13 +202,13 @@ public:
 
 	void RotateLeft()
 	{
-		ry = 1.0f;
+		ry = rotspeed;
 		Rotate();
 	}
 
 	void RotateRight()
 	{
-		ry = -1.0f;
+		ry = -rotspeed;
 		Rotate();
 	}
 

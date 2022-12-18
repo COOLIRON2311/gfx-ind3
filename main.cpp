@@ -83,14 +83,14 @@ int main()
 				// Rotation
 				if (event.key.code == sf::Keyboard::W)
 				{
-					cam.FWD(tonk->dir);
+					cam.FWD(tonk->dir, tonk->speed);
 					tonk->MoveForward();
 					sl.pos = tonk->center;
 					sl.direction = -tonk->dir;
 				}
 				if (event.key.code == sf::Keyboard::S)
 				{
-					cam.BWD(tonk->dir);
+					cam.BWD(tonk->dir, tonk->speed);
 					tonk->MoveBackward();
 					sl.pos = tonk->center;
 					sl.direction = -tonk->dir;
@@ -111,37 +111,23 @@ int main()
 				}
 
 				// Movement
-				if (event.key.code == sf::Keyboard::Up)
+				if (event.key.code == sf::Keyboard::Numpad8)
 				{
 					cam.W();
 				}
-				if (event.key.code == sf::Keyboard::Down)
+				if (event.key.code == sf::Keyboard::Numpad2)
 				{
 					cam.S();
 				}
-				if (event.key.code == sf::Keyboard::Left)
-				{
-					cam.A();
-				}
-				if (event.key.code == sf::Keyboard::Right)
+				if (event.key.code == sf::Keyboard::Numpad6)
 				{
 					cam.D();
 				}
-
-				if (event.key.code == sf::Keyboard::F1)
+				if (event.key.code == sf::Keyboard::Numpad4)
 				{
-					cam.Perspective();
+					cam.A();
 				}
 
-				if (event.key.code == sf::Keyboard::F2)
-				{
-					cam.Ortho();
-				}
-
-				/*if (event.key.code == sf::Keyboard::Escape)
-				{
-					cam.Reset();
-				}*/
 
 				if (event.key.code == sf::Keyboard::Num1)
 				{
@@ -213,8 +199,8 @@ void InitVBO()
 	for (int i = 0; i < 3; i++)
 	{
 		Object* o = objects[1].copy();
-		o->dx = rand() % 20;
-		o->dz = rand() % 20;
+		o->dx = rand() % 19;
+		o->dz = rand() % 19;
 		o->ry = rand() % 360;
 		o->Update();
 		enemy_tanks.push_back(o);

@@ -121,18 +121,18 @@ public:
 		return proj;
 	}
 
-	void FWD(const glm::vec3& td)
+	void FWD(const glm::vec3& td, const float ts)
 	{
-		Pos.x += 0.1f * -td.x;
+		Pos.x += ts * -td.x;
 		Pos.y = offset.y;
-		Pos.z += 0.1f * -td.z;
+		Pos.z += ts * -td.z;
 	}
 	
-	void BWD(const glm::vec3& td)
+	void BWD(const glm::vec3& td, const float ts)
 	{
-		Pos.x += 0.1f * td.x;
+		Pos.x += ts * td.x;
 		Pos.y = offset.y;
-		Pos.z += 0.1f * td.z;
+		Pos.z += ts * td.z;
 	}
 
 	void RotRight(const glm::vec3 tc, const glm::vec3& td)
