@@ -33,6 +33,13 @@ void Init()
 	mat.emission = glm::vec3(0.0f, 0.0f, 0.0f);
 	mat.shininess = 1.0f;
 
+	// Laser
+	laser.ambient = glm::vec3(1.0f, 1.0f, 1.0f);
+	laser.diffuse = glm::vec3(1.0f, 1.0f, 1.0f);
+	laser.specular = glm::vec3(1.0f, 1.0f, 1.0f);
+	laser.emission = glm::vec3(1.0f, 1.0f, 1.0f);
+	laser.shininess = 1.0f;
+
 	if (!bg.openFromFile("music/big_rock.ogg"))
 	{
 		music_playing = false;
@@ -44,6 +51,8 @@ void Init()
 		bg.setLoop(true);
 		// bg.play();
 	}
+
+	laser_sfx.openFromFile("music/laser.ogg");
 
 	//Включаем проверку глубины
 	glEnable(GL_DEPTH_TEST);
@@ -128,7 +137,7 @@ int main()
 					cam.A();
 				}
 
-
+				// Debug camera movement
 				if (event.key.code == sf::Keyboard::Num1)
 				{
 					pl.Config();
@@ -141,7 +150,9 @@ int main()
 				{
 					sl.Config();
 				}
-				if (event.key.code == sf::Keyboard::Space)
+				
+				// Music
+				if (event.key.code == sf::Keyboard::M)
 				{
 					music_playing = !music_playing;
 					if (music_playing)
@@ -149,12 +160,66 @@ int main()
 					else
 						bg.pause();
 				}
+
+				// Light
 				if (event.key.code == sf::Keyboard::LAlt)
 				{
 					sl.enabled = !sl.enabled;
 				}
 			}
+			// Weapons
+			if (event.key.code == sf::Mouse::Right)
+			{
+				laser_sfx.stop();
+				laser_sfx.play();
+				const int frames = 10;
+				glm::vec3 p;
+				
+				// check if laser ray hit something
+				for (auto& t : enemy_tanks)
+				{
+					p = t->HitLaser(tonk->center, tonk->dir);
+					if (tonk->center != p)
+					{
+						t->hit = true;
+						goto zap_end;
+					}
+				}
 
+				for (auto& b : barrels)
+				{
+					p = b->HitLaser(tonk->center, tonk->dir);
+					if (tonk->center != p)
+					{
+						b->hit = true;
+						goto zap_end;
+					}
+				}
+				
+				for (auto& t : trees)
+				{
+					p = t->HitLaser(tonk->center, tonk->dir);
+					if (tonk->center != p)
+					{
+						t->hit = true;
+						goto zap_end;
+					}
+				}
+				
+				for (auto& r : rocks)
+				{
+					p = r->HitLaser(tonk->center, tonk->dir);
+					if (tonk->center != p)
+					{
+						r->hit = true;
+						goto zap_end;
+					}
+				}
+				p = tonk->center + -tonk->dir.xyz() * 1000.0f;
+			zap_end:
+				laser_frames = frames;
+				zap(tonk->center, p);
+			}
 		}
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // Очищаем буфер цвета и буфер глубины
 		Draw(window); // Рисуем
@@ -178,40 +243,40 @@ void LoadObject(int i, const char* path)
 
 bool intersects(Object* obj)
 {
-	const float r = 3.0f;
+	const float R = 3.0f;
 	obj->Update();
 	
-	if (glm::distance(obj->center, tonk->center) < r)
+	if (glm::distance(obj->center, tonk->center) < R)
 	{
 		return true;
 	}
 
-	if (glm::distance(obj->center, objects[2].center) < r)
+	if (glm::distance(obj->center, objects[2].center) < R)
 	{
 		return true;
 	}
 	
-	for (int i = 0; i < enemy_tanks.size(); i++)
+	for (auto& t : enemy_tanks)
 	{
-		if (glm::distance(obj->center, enemy_tanks[i]->center) < r)
+		if (glm::distance(obj->center, t->center) < R)
 			return true;
 	}
 
-	for (int i = 0; i < barrels.size(); i++)
+	for (auto& b : barrels)
 	{
-		if (glm::distance(obj->center, barrels[i]->center) < r)
+		if (glm::distance(obj->center,b->center) < R)
 			return true;
 	}
 
-	for (int i = 0; i < trees.size(); i++)
+	for (auto& t : trees)
 	{
-		if (glm::distance(obj->center, trees[i]->center) < r)
+		if (glm::distance(obj->center, t->center) < R)
 			return true;
 	}
 
-	for (int i = 0; i < rocks.size(); i++)
+	for (auto& r : rocks)
 	{
-		if (glm::distance(obj->center, rocks[i]->center) < r)
+		if (glm::distance(obj->center, r->center) < R)
 			return true;
 	}
 
@@ -221,6 +286,7 @@ bool intersects(Object* obj)
 
 void InitVBO()
 {
+	glGenBuffers(1, &laser_vbo);
 	LoadObject(0, "models/Field.obj");
 	LoadObject(1, "models/Tank.obj");
 	LoadObject(2, "models/ChrTree.obj");
@@ -435,6 +501,34 @@ void Draw(sf::Window& window)
 	glDisableVertexAttribArray(Phong_texcoord);
 	glDisableVertexAttribArray(Phong_normal);
 	glUseProgram(0); // Отключаем шейдерную программу
+
+	// Laser
+	if (laser_frames > 0)
+	{
+		laser_frames--;
+		glUseProgram(Programs[0]);
+		tex_loc = glGetUniformLocation(Programs[0], "tex");
+		pl.Load(Programs[0]);
+		dl.Load(Programs[0]);
+		sl.Load(Programs[0]);
+		laser.Load(Programs[0]);
+		glUniformMatrix4fv(Phong_mvp, 1, GL_FALSE, glm::value_ptr(cam.MVP()));
+		glUniform3fv(Phong_viewPos, 1, glm::value_ptr(cam.Pos));
+		glUniform1i(tex_loc, 2);
+		glEnableVertexAttribArray(Phong_coord);
+		glEnableVertexAttribArray(Phong_texcoord);
+		glEnableVertexAttribArray(Phong_normal);
+		glBindBuffer(GL_ARRAY_BUFFER, laser_vbo);
+		glVertexAttribPointer(Phong_coord, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)0);
+		glVertexAttribPointer(Phong_texcoord, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
+		glVertexAttribPointer(Phong_normal, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)(5 * sizeof(GLfloat)));
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		glDrawArrays(GL_LINES, 0, 2);
+		glDisableVertexAttribArray(Phong_coord);
+		glDisableVertexAttribArray(Phong_texcoord);
+		glDisableVertexAttribArray(Phong_normal);
+		glUseProgram(0); // Отключаем шейдерную программу
+	}
 
 	// Christmas tree
 	glUseProgram(Programs[0]);

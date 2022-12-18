@@ -27,11 +27,14 @@
 
 using namespace std;
 
+// Camera
 Camera cam;
 
+// Music
 sf::Music bg;
 bool music_playing;
 
+// Stuff
 vector<Object> objects;
 array<GLuint, 1> Programs;
 array<GLuint, 7> textures;
@@ -41,16 +44,24 @@ vector<Object*> rocks;
 vector<Object*> barrels;
 PlayerTank* tonk;
 
+// Attribs
 GLint Phong_coord;
 GLint Phong_texcoord;
 GLint Phong_normal;
 GLint Phong_mvp;
 GLint Phong_viewPos;
 
+// Lights
 PointLight pl;
 DirLight dl;
 SpotLight sl;
 Material mat;
+
+// Laser
+Material laser;
+sf::Music laser_sfx;
+GLuint laser_vbo;
+int laser_frames;
 
 // Функция для установки иконки приложения
 void SetIcon(sf::Window& wnd);
@@ -155,4 +166,20 @@ const GLchar** load_shader(const char* path)
 	char* out = new char[src.length() + 1];
 	strcpy_s(out, src.length() + 1, src.c_str());
 	return (const GLchar**) & out;
+}
+
+// load points a and b into laser_vbo
+void zap(const glm::vec3 a, const glm::vec3 b)
+{
+	Vertex v[2];
+	v[0].x = a.x;
+	v[0].y = a.y;
+	v[0].z = a.z;
+	v[1].x = b.x;
+	v[1].y = b.y;
+	v[1].z = b.z;
+	glBindBuffer(GL_ARRAY_BUFFER, laser_vbo);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(v), v, GL_STATIC_DRAW);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	
 }

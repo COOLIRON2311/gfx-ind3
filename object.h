@@ -32,7 +32,7 @@ void checkOpenGLerror();
 class Object
 {
 protected:
-	const float R = 3.0f;
+	const float R = 2.0f;
 	void ApplyTransform()
 	{
 		glm::mat4 model = glm::mat4(1.0f);
