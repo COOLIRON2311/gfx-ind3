@@ -140,10 +140,9 @@ public:
 		Front.x = -td.x;
 		Front.z = -td.z;
 		Pos.x = tc.x;
-		Pos.y = offset.y;
 		Pos.z = tc.z;
-		Pos -= glm::length(offset) * Front;
-		//Pos.y = offset.y;
+		Pos -= glm::length(offset.xz()) * Front;
+		Pos.y = offset.y;
 	}
 	
 	void RotLeft(const glm::vec3 tc, const glm::vec3& td)
@@ -151,9 +150,8 @@ public:
 		Front.x = -td.x;
 		Front.z = -td.z;
 		Pos.x = tc.x;
-		Pos.y = offset.y;
 		Pos.z = tc.z;
-		Pos -= glm::length(offset) * Front;
-		//Pos.y = offset.y;
+		Pos -= glm::length(offset.xz()) * Front;
+		Pos.y = offset.y;
 	}
 };

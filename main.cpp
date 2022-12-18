@@ -17,7 +17,7 @@ void Init()
 	dl.specular = glm::vec3(0.5f);
 
 	// Spot light
-	sl.enabled = true;
+	sl.enabled = false;
 	sl.pos = glm::vec3(-5.0f, -8.37f, -5.0f);
 	sl.direction = glm::vec3(1.0f);
 	sl.ambient = glm::vec3(1.0f);
@@ -200,6 +200,8 @@ void InitVBO()
 	LoadObject(5, "models/Stone.obj");
 	// Player tank
 	tonk = new PlayerTank(objects[1]);
+	sl.pos = tonk->center;
+	sl.direction = -tonk->dir;
 
 	// Christmas tree
 	objects[2].dx = 10;
