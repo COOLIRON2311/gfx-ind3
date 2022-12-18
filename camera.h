@@ -123,31 +123,37 @@ public:
 
 	void FWD(const glm::vec3& td)
 	{
-		model = glm::translate(model, glm::vec3(0.1f * td.x, 0.0f, 0.1f * td.z));
+		Pos.x += 0.1f * -td.x;
+		Pos.y = offset.y;
+		Pos.z += 0.1f * -td.z;
 	}
 	
 	void BWD(const glm::vec3& td)
 	{
-		model = glm::translate(model, glm::vec3(-0.1f * td.x, 0.0f, -0.1f * td.z));
+		Pos.x += 0.1f * td.x;
+		Pos.y = offset.y;
+		Pos.z += 0.1f * td.z;
 	}
 
 	void RotRight(const glm::vec3 tc, const glm::vec3& td)
 	{
-		model = glm::translate(model, glm::vec3(Pos.x, 0.0f, Pos.z));
-		model = glm::rotate(model, glm::radians(1.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-		model = glm::translate(model, glm::vec3(-Pos.x, 0.0f, -Pos.z));
+		Front.x = -td.x;
+		Front.z = -td.z;
 		Pos.x = tc.x;
 		Pos.y = offset.y;
 		Pos.z = tc.z;
+		Pos -= glm::length(offset) * Front;
+		//Pos.y = offset.y;
 	}
 	
 	void RotLeft(const glm::vec3 tc, const glm::vec3& td)
 	{
-		model = glm::translate(model, glm::vec3(Pos.x, 0.0f, Pos.z));
-		model = glm::rotate(model, glm::radians(-1.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-		model = glm::translate(model, glm::vec3(-Pos.x, 0.0f, -Pos.z));
+		Front.x = -td.x;
+		Front.z = -td.z;
 		Pos.x = tc.x;
 		Pos.y = offset.y;
 		Pos.z = tc.z;
+		Pos -= glm::length(offset) * Front;
+		//Pos.y = offset.y;
 	}
 };

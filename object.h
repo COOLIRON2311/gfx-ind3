@@ -68,7 +68,7 @@ protected:
 		z /= vertices.size();
 		center = glm::vec3(x, y, z);
 	}
-	
+
 public:
 	float dx;
 	float dz;
@@ -77,7 +77,7 @@ public:
 	GLuint id;
 	glm::vec3 center;
 	vector<Vertex> vertices;
-	
+
 	Object(GLuint id, const vector<Vertex>& vertices, float dx = 0.0f, float dz = 0.0f, float ry = 0.0f)
 	{
 		this->id = id;
@@ -115,7 +115,7 @@ public:
 			hit = true;
 		}
 	}
-	
+
 	glm::vec3 HitLaser(const glm::vec3 pos, const glm::vec3 dir)
 	{
 		glm::vec3 n = glm::normalize(dir);
@@ -131,6 +131,11 @@ public:
 		}
 		// if there is no hit return ray origin
 		return pos;
+	}
+
+	void destroy()
+	{
+		glDeleteBuffers(1, &id);
 	}
 };
 

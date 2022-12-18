@@ -1,3 +1,4 @@
+#define GLM_SWIZZLE
 #include "main.h"
 
 void Init()
@@ -80,41 +81,49 @@ int main()
 			else if (event.type == sf::Event::KeyPressed) // Если пользователь нажал клавишу
 			{
 				// Rotation
-				if (event.key.code == sf::Keyboard::Up)
+				if (event.key.code == sf::Keyboard::W)
 				{
 					cam.FWD(tonk->dir);
 					tonk->MoveForward();
-				}
-				if (event.key.code == sf::Keyboard::Down)
-				{
-					cam.BWD(tonk->dir);
-					tonk->MoveBackward();
-				}
-				if (event.key.code == sf::Keyboard::Right)
-				{
-					tonk->RotateRight();
-					cam.RotRight(tonk->center, tonk->dir);
-				}
-				if (event.key.code == sf::Keyboard::Left)
-				{
-					tonk->RotateLeft();
-					cam.RotLeft(tonk->center, tonk->dir);
-				}
-
-				// Movement
-				if (event.key.code == sf::Keyboard::W)
-				{
-					cam.W();
+					sl.pos = tonk->center;
+					sl.direction = -tonk->dir;
 				}
 				if (event.key.code == sf::Keyboard::S)
 				{
-					cam.S();
+					cam.BWD(tonk->dir);
+					tonk->MoveBackward();
+					sl.pos = tonk->center;
+					sl.direction = -tonk->dir;
+				}
+				if (event.key.code == sf::Keyboard::D)
+				{
+					tonk->RotateRight();
+					cam.RotRight(tonk->center, tonk->dir);
+					sl.pos = tonk->center;
+					sl.direction = -tonk->dir;
 				}
 				if (event.key.code == sf::Keyboard::A)
 				{
+					tonk->RotateLeft();
+					cam.RotLeft(tonk->center, tonk->dir);
+					sl.pos = tonk->center;
+					sl.direction = -tonk->dir;
+				}
+
+				// Movement
+				if (event.key.code == sf::Keyboard::Up)
+				{
+					cam.W();
+				}
+				if (event.key.code == sf::Keyboard::Down)
+				{
+					cam.S();
+				}
+				if (event.key.code == sf::Keyboard::Left)
+				{
 					cam.A();
 				}
-				if (event.key.code == sf::Keyboard::D)
+				if (event.key.code == sf::Keyboard::Right)
 				{
 					cam.D();
 				}
@@ -129,10 +138,10 @@ int main()
 					cam.Ortho();
 				}
 
-				if (event.key.code == sf::Keyboard::Escape)
+				/*if (event.key.code == sf::Keyboard::Escape)
 				{
 					cam.Reset();
-				}
+				}*/
 
 				if (event.key.code == sf::Keyboard::Num1)
 				{
@@ -420,109 +429,121 @@ void Draw(sf::Window& window)
 	// Enemy tanks
 	for (int i = 0; i < enemy_tanks.size(); i++)
 	{
-		glUseProgram(Programs[0]);
-		tex_loc = glGetUniformLocation(Programs[0], "tex");
-		pl.Load(Programs[0]);
-		dl.Load(Programs[0]);
-		sl.Load(Programs[0]);
-		mat.Load(Programs[0]);
-		glUniformMatrix4fv(Phong_mvp, 1, GL_FALSE, glm::value_ptr(cam.MVP()));
-		glUniform3fv(Phong_viewPos, 1, glm::value_ptr(cam.Pos));
-		glUniform1i(tex_loc, 6);
-		glEnableVertexAttribArray(Phong_coord);
-		glEnableVertexAttribArray(Phong_texcoord);
-		glEnableVertexAttribArray(Phong_normal);
-		glBindBuffer(GL_ARRAY_BUFFER, enemy_tanks[i]->id);
-		glVertexAttribPointer(Phong_coord, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)0);
-		glVertexAttribPointer(Phong_texcoord, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
-		glVertexAttribPointer(Phong_normal, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)(5 * sizeof(GLfloat)));
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
-		glDrawArrays(GL_TRIANGLES, 0, enemy_tanks[i]->size());
-		glDisableVertexAttribArray(Phong_coord);
-		glDisableVertexAttribArray(Phong_texcoord);
-		glDisableVertexAttribArray(Phong_normal);
-		glUseProgram(0); // Отключаем шейдерную программу
+		if (!enemy_tanks[i]->hit)
+		{
+			glUseProgram(Programs[0]);
+			tex_loc = glGetUniformLocation(Programs[0], "tex");
+			pl.Load(Programs[0]);
+			dl.Load(Programs[0]);
+			sl.Load(Programs[0]);
+			mat.Load(Programs[0]);
+			glUniformMatrix4fv(Phong_mvp, 1, GL_FALSE, glm::value_ptr(cam.MVP()));
+			glUniform3fv(Phong_viewPos, 1, glm::value_ptr(cam.Pos));
+			glUniform1i(tex_loc, 6);
+			glEnableVertexAttribArray(Phong_coord);
+			glEnableVertexAttribArray(Phong_texcoord);
+			glEnableVertexAttribArray(Phong_normal);
+			glBindBuffer(GL_ARRAY_BUFFER, enemy_tanks[i]->id);
+			glVertexAttribPointer(Phong_coord, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)0);
+			glVertexAttribPointer(Phong_texcoord, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
+			glVertexAttribPointer(Phong_normal, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)(5 * sizeof(GLfloat)));
+			glBindBuffer(GL_ARRAY_BUFFER, 0);
+			glDrawArrays(GL_TRIANGLES, 0, enemy_tanks[i]->size());
+			glDisableVertexAttribArray(Phong_coord);
+			glDisableVertexAttribArray(Phong_texcoord);
+			glDisableVertexAttribArray(Phong_normal);
+			glUseProgram(0); // Отключаем шейдерную программу
+		}
 	}
 
 	// Barrels
 	for (int i = 0; i < barrels.size(); i++)
 	{
-		glUseProgram(Programs[0]);
-		tex_loc = glGetUniformLocation(Programs[0], "tex");
-		pl.Load(Programs[0]);
-		dl.Load(Programs[0]);
-		sl.Load(Programs[0]);
-		mat.Load(Programs[0]);
-		glUniformMatrix4fv(Phong_mvp, 1, GL_FALSE, glm::value_ptr(cam.MVP()));
-		glUniform3fv(Phong_viewPos, 1, glm::value_ptr(cam.Pos));
-		glUniform1i(tex_loc, 3);
-		glEnableVertexAttribArray(Phong_coord);
-		glEnableVertexAttribArray(Phong_texcoord);
-		glEnableVertexAttribArray(Phong_normal);
-		glBindBuffer(GL_ARRAY_BUFFER, barrels[i]->id);
-		glVertexAttribPointer(Phong_coord, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)0);
-		glVertexAttribPointer(Phong_texcoord, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
-		glVertexAttribPointer(Phong_normal, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)(5 * sizeof(GLfloat)));
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
-		glDrawArrays(GL_TRIANGLES, 0, barrels[i]->size());
-		glDisableVertexAttribArray(Phong_coord);
-		glDisableVertexAttribArray(Phong_texcoord);
-		glDisableVertexAttribArray(Phong_normal);
-		glUseProgram(0); // Отключаем шейдерную программу
+		if (!barrels[i]->hit)
+		{
+			glUseProgram(Programs[0]);
+			tex_loc = glGetUniformLocation(Programs[0], "tex");
+			pl.Load(Programs[0]);
+			dl.Load(Programs[0]);
+			sl.Load(Programs[0]);
+			mat.Load(Programs[0]);
+			glUniformMatrix4fv(Phong_mvp, 1, GL_FALSE, glm::value_ptr(cam.MVP()));
+			glUniform3fv(Phong_viewPos, 1, glm::value_ptr(cam.Pos));
+			glUniform1i(tex_loc, 3);
+			glEnableVertexAttribArray(Phong_coord);
+			glEnableVertexAttribArray(Phong_texcoord);
+			glEnableVertexAttribArray(Phong_normal);
+			glBindBuffer(GL_ARRAY_BUFFER, barrels[i]->id);
+			glVertexAttribPointer(Phong_coord, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)0);
+			glVertexAttribPointer(Phong_texcoord, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
+			glVertexAttribPointer(Phong_normal, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)(5 * sizeof(GLfloat)));
+			glBindBuffer(GL_ARRAY_BUFFER, 0);
+			glDrawArrays(GL_TRIANGLES, 0, barrels[i]->size());
+			glDisableVertexAttribArray(Phong_coord);
+			glDisableVertexAttribArray(Phong_texcoord);
+			glDisableVertexAttribArray(Phong_normal);
+			glUseProgram(0); // Отключаем шейдерную программу
+		}
 	}
 
 	// Trees
 	for (int i = 0; i < trees.size(); i++)
 	{
-		glUseProgram(Programs[0]);
-		tex_loc = glGetUniformLocation(Programs[0], "tex");
-		pl.Load(Programs[0]);
-		dl.Load(Programs[0]);
-		sl.Load(Programs[0]);
-		mat.Load(Programs[0]);
-		glUniformMatrix4fv(Phong_mvp, 1, GL_FALSE, glm::value_ptr(cam.MVP()));
-		glUniform3fv(Phong_viewPos, 1, glm::value_ptr(cam.Pos));
-		glUniform1i(tex_loc, 4);
-		glEnableVertexAttribArray(Phong_coord);
-		glEnableVertexAttribArray(Phong_texcoord);
-		glEnableVertexAttribArray(Phong_normal);
-		glBindBuffer(GL_ARRAY_BUFFER, trees[i]->id);
-		glVertexAttribPointer(Phong_coord, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)0);
-		glVertexAttribPointer(Phong_texcoord, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
-		glVertexAttribPointer(Phong_normal, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)(5 * sizeof(GLfloat)));
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
-		glDrawArrays(GL_TRIANGLES, 0, trees[i]->size());
-		glDisableVertexAttribArray(Phong_coord);
-		glDisableVertexAttribArray(Phong_texcoord);
-		glDisableVertexAttribArray(Phong_normal);
-		glUseProgram(0); // Отключаем шейдерную программу
+		if (!trees[i]->hit)
+		{
+			glUseProgram(Programs[0]);
+			tex_loc = glGetUniformLocation(Programs[0], "tex");
+			pl.Load(Programs[0]);
+			dl.Load(Programs[0]);
+			sl.Load(Programs[0]);
+			mat.Load(Programs[0]);
+			glUniformMatrix4fv(Phong_mvp, 1, GL_FALSE, glm::value_ptr(cam.MVP()));
+			glUniform3fv(Phong_viewPos, 1, glm::value_ptr(cam.Pos));
+			glUniform1i(tex_loc, 4);
+			glEnableVertexAttribArray(Phong_coord);
+			glEnableVertexAttribArray(Phong_texcoord);
+			glEnableVertexAttribArray(Phong_normal);
+			glBindBuffer(GL_ARRAY_BUFFER, trees[i]->id);
+			glVertexAttribPointer(Phong_coord, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)0);
+			glVertexAttribPointer(Phong_texcoord, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
+			glVertexAttribPointer(Phong_normal, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)(5 * sizeof(GLfloat)));
+			glBindBuffer(GL_ARRAY_BUFFER, 0);
+			glDrawArrays(GL_TRIANGLES, 0, trees[i]->size());
+			glDisableVertexAttribArray(Phong_coord);
+			glDisableVertexAttribArray(Phong_texcoord);
+			glDisableVertexAttribArray(Phong_normal);
+			glUseProgram(0); // Отключаем шейдерную программу
+		}
 	}
 
 	// Rocks
 	for (int i = 0; i < rocks.size(); i++)
 	{
-		glUseProgram(Programs[0]);
-		tex_loc = glGetUniformLocation(Programs[0], "tex");
-		pl.Load(Programs[0]);
-		dl.Load(Programs[0]);
-		sl.Load(Programs[0]);
-		mat.Load(Programs[0]);
-		glUniformMatrix4fv(Phong_mvp, 1, GL_FALSE, glm::value_ptr(cam.MVP()));
-		glUniform3fv(Phong_viewPos, 1, glm::value_ptr(cam.Pos));
-		glUniform1i(tex_loc, 5);
-		glEnableVertexAttribArray(Phong_coord);
-		glEnableVertexAttribArray(Phong_texcoord);
-		glEnableVertexAttribArray(Phong_normal);
-		glBindBuffer(GL_ARRAY_BUFFER, rocks[i]->id);
-		glVertexAttribPointer(Phong_coord, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)0);
-		glVertexAttribPointer(Phong_texcoord, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
-		glVertexAttribPointer(Phong_normal, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)(5 * sizeof(GLfloat)));
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
-		glDrawArrays(GL_TRIANGLES, 0, rocks[i]->size());
-		glDisableVertexAttribArray(Phong_coord);
-		glDisableVertexAttribArray(Phong_texcoord);
-		glDisableVertexAttribArray(Phong_normal);
-		glUseProgram(0); // Отключаем шейдерную программу
+		if (!rocks[i]->hit)
+		{
+			glUseProgram(Programs[0]);
+			tex_loc = glGetUniformLocation(Programs[0], "tex");
+			pl.Load(Programs[0]);
+			dl.Load(Programs[0]);
+			sl.Load(Programs[0]);
+			mat.Load(Programs[0]);
+			glUniformMatrix4fv(Phong_mvp, 1, GL_FALSE, glm::value_ptr(cam.MVP()));
+			glUniform3fv(Phong_viewPos, 1, glm::value_ptr(cam.Pos));
+			glUniform1i(tex_loc, 5);
+			glEnableVertexAttribArray(Phong_coord);
+			glEnableVertexAttribArray(Phong_texcoord);
+			glEnableVertexAttribArray(Phong_normal);
+			glBindBuffer(GL_ARRAY_BUFFER, rocks[i]->id);
+			glVertexAttribPointer(Phong_coord, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)0);
+			glVertexAttribPointer(Phong_texcoord, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
+			glVertexAttribPointer(Phong_normal, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)(5 * sizeof(GLfloat)));
+			glBindBuffer(GL_ARRAY_BUFFER, 0);
+			glDrawArrays(GL_TRIANGLES, 0, rocks[i]->size());
+			glDisableVertexAttribArray(Phong_coord);
+			glDisableVertexAttribArray(Phong_texcoord);
+			glDisableVertexAttribArray(Phong_normal);
+			glUseProgram(0); // Отключаем шейдерную программу
+		}
 	}
 	
 
@@ -541,6 +562,26 @@ void ReleaseVBO()
 	for (int i = 0; i < objects.size(); i++)
 	{
 		glDeleteBuffers(1, &objects[i].id); // Удаляем буфер
+	}
+	for (int i = 0; i < barrels.size(); i++)
+	{
+		barrels[i]->destroy();
+		delete barrels[i];
+	}
+	for (int i = 0; i < trees.size(); i++)
+	{
+		trees[i]->destroy();
+		delete trees[i];
+	}
+	for (int i = 0; i < rocks.size(); i++)
+	{
+		rocks[i]->destroy();
+		delete rocks[i];
+	}
+	for (int i = 0; i < enemy_tanks.size(); i++)
+	{
+		enemy_tanks[i]->destroy();
+		delete enemy_tanks[i];
 	}
 }
 
