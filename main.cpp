@@ -176,6 +176,49 @@ void LoadObject(int i, const char* path)
 	checkOpenGLerror();
 }
 
+bool intersects(Object* obj)
+{
+	const float r = 3.0f;
+	obj->Update();
+	
+	if (glm::distance(obj->center, tonk->center) < r)
+	{
+		return true;
+	}
+
+	if (glm::distance(obj->center, objects[2].center) < r)
+	{
+		return true;
+	}
+	
+	for (int i = 0; i < enemy_tanks.size(); i++)
+	{
+		if (glm::distance(obj->center, enemy_tanks[i]->center) < r)
+			return true;
+	}
+
+	for (int i = 0; i < barrels.size(); i++)
+	{
+		if (glm::distance(obj->center, barrels[i]->center) < r)
+			return true;
+	}
+
+	for (int i = 0; i < trees.size(); i++)
+	{
+		if (glm::distance(obj->center, trees[i]->center) < r)
+			return true;
+	}
+
+	for (int i = 0; i < rocks.size(); i++)
+	{
+		if (glm::distance(obj->center, rocks[i]->center) < r)
+			return true;
+	}
+
+	return false;
+
+}
+
 void InitVBO()
 {
 	LoadObject(0, "models/Field.obj");
@@ -194,15 +237,16 @@ void InitVBO()
 	objects[2].dz = 10;
 	for (auto& obj : objects)
 		obj.Update();
-	
+
 	// Enemy tanks
 	for (int i = 0; i < 3; i++)
 	{
 		Object* o = objects[1].copy();
-		o->dx = rand() % 19;
-		o->dz = rand() % 19;
-		o->ry = rand() % 360;
-		o->Update();
+		do {
+			o->dx = rand() % 16;
+			o->dz = rand() % 16;
+			o->ry = rand() % 360;
+		} while (intersects(o));
 		enemy_tanks.push_back(o);
 	}
 
@@ -210,21 +254,23 @@ void InitVBO()
 	for (int i = 0; i < 3; i++)
 	{
 		Object* o = objects[3].copy();
-		o->dx = rand() % 20;
-		o->dz = rand() % 20;
-		o->ry = rand() % 360;
-		o->Update();
+		do {
+			o->dx = rand() % 16;
+			o->dz = rand() % 16;
+			o->ry = rand() % 360;
+		} while (intersects(o));
 		barrels.push_back(o);
 	}
-	
+
 	// Trees
 	for (int i = 0; i < 3; i++)
 	{
 		Object* o = objects[4].copy();
-		o->dx = rand() % 20;
-		o->dz = rand() % 20;
-		o->ry = rand() % 360;
-		o->Update();
+		do {
+			o->dx = rand() % 16;
+			o->dz = rand() % 16;
+			o->ry = rand() % 360;
+		} while (intersects(o));
 		trees.push_back(o);
 	}
 
@@ -232,10 +278,11 @@ void InitVBO()
 	for (int i = 0; i < 3; i++)
 	{
 		Object* o = objects[5].copy();
-		o->dx = rand() % 20;
-		o->dz = rand() % 20;
-		o->ry = rand() % 360;
-		o->Update();
+		do {
+			o->dx = rand() % 16;
+			o->dz = rand() % 16;
+			o->ry = rand() % 360;
+		} while (intersects(o));
 		rocks.push_back(o);
 	}
 }
@@ -318,7 +365,7 @@ void InitShader()
 
 	// Линкуем шейдерную программу
 	glLinkProgram(Programs[0]);
-	
+
 	int link1;
 	glGetProgramiv(Programs[0], GL_LINK_STATUS, &link1);
 
@@ -388,7 +435,7 @@ void Draw(sf::Window& window)
 	glDisableVertexAttribArray(Phong_texcoord);
 	glDisableVertexAttribArray(Phong_normal);
 	glUseProgram(0); // Отключаем шейдерную программу
-	
+
 	// Christmas tree
 	glUseProgram(Programs[0]);
 	tex_loc = glGetUniformLocation(Programs[0], "tex");
@@ -533,7 +580,7 @@ void Draw(sf::Window& window)
 			glUseProgram(0); // Отключаем шейдерную программу
 		}
 	}
-	
+
 
 	checkOpenGLerror(); // Проверяем на ошибки
 }
