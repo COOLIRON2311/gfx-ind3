@@ -26,13 +26,18 @@ struct Vertex
 	GLfloat nz;
 };
 
+ostream& operator<<(ostream& os, const glm::vec3 v)
+{
+	return os << "{" << v.x << ", " << v.y << ", " << v.z << "}";
+}
+
 // Функция для проверки ошибок
 void checkOpenGLerror();
 
 class Object
 {
 protected:
-	const float R = 2.0f;
+	const float R = 1.0f;
 	void ApplyTransform()
 	{
 		glm::mat4 model = glm::mat4(1.0f);
@@ -116,21 +121,55 @@ public:
 		}
 	}
 
-	glm::vec3 HitLaser(const glm::vec3 pos, const glm::vec3 dir)
+	glm::vec3 HitLaser(const glm::vec3 pos, const glm::vec3 d)
 	{
-		glm::vec3 n = glm::normalize(dir);
-		glm::vec3 p = pos;
-		glm::vec3 c = center;
-		float d = glm::distance(p, c);
-		float t = glm::dot(c - p, n);
-		glm::vec3 q = p + t * n;
-		if (glm::distance(q, c) < R)
+		static const float inf = 1e10;
+		glm::vec3 T = pos - center; // вектор от центра объекта до точки попадания лазера
+		float A = 1.0f; // коэффициент A квадратичного уравнения
+		float B = 2.0f * glm::dot(T, d); // коэффициент B квадратичного уравнения
+		float C = glm::dot(T, T) - R * R; // коэффициент C квадратичного уравнения
+		float delta = B * B - 4.0f * A * C; // дискриминант квадратичного уравнения
+		float dist = inf; // расстояние до точки попадания лазера
+		glm::vec3 hit_pos = glm::vec3(0.0f);
+		if (delta > -1e-4) // если дискриминант больше нуля, то есть два корня
 		{
-			hit = true;
-			return q;
+			delta = max(0.0f, delta); // избавляемся от машинного нуля
+			float sdelta = sqrt(delta); // корень из дискриминанта
+			float ratio = 0.5f / A; // коэффициент для вычисления корней
+			float ret1 = ratio * (-B - sdelta); // первый корень
+			dist = ret1; // выбираем первый корень
+			if (dist < inf) // если первый корень корректен
+			{
+				float old_dist = dist; // сохраняем старое расстояние
+				glm::vec3 new_pos = pos + d * dist; // вычисляем новую позицию
+				T = new_pos - center; // вычисляем новый вектор от центра объекта до точки попадания лазера
+				A = 1.0f; // коэффициент A квадратичного уравнения
+				B = 2.0f * glm::dot(T, d); // коэффициент B квадратичного уравнения
+				C = glm::dot(T, T) - R * R; // коэффициент C квадратичного уравнения
+				delta = B * B - 4.0f * A * C; // дискриминант квадратичного уравнения
+				if (delta > 0) // если дискриминант больше нуля, то есть два корня
+				{
+					sdelta = sqrt(delta); // корень из дискриминанта
+					ratio = 0.5f / A; // коэффициент для вычисления корней
+					ret1 = ratio * (-B - sdelta); // второй корень
+					if (ret1 > 0.0f) // если второй корень корректен
+					{
+						dist = ret1; // выбираем второй корень
+						hit_pos = new_pos + ratio * (-B - sdelta) * d; // вычисляем точку попадания лазера
+					}
+				}
+				else
+				{
+					dist = inf; // если дискриминант меньше нуля, то нет корней
+				}
+
+			}
 		}
-		// if there is no hit return ray origin
-		return pos;
+		cout << "pos: " << pos << ", d: " << d << ", dist: " << dist << ", hit_pos: " << hit_pos << endl;
+		if (dist < inf)
+			return hit_pos; // возвращаем точку попадания лазера
+		else
+			return pos; // если луч не попал в объект, то возвращаем исходную позицию
 	}
 
 	void destroy()

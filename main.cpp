@@ -34,10 +34,10 @@ void Init()
 	mat.shininess = 1.0f;
 
 	// Laser
-	laser.ambient = glm::vec3(1.0f, 1.0f, 1.0f);
-	laser.diffuse = glm::vec3(1.0f, 1.0f, 1.0f);
-	laser.specular = glm::vec3(1.0f, 1.0f, 1.0f);
-	laser.emission = glm::vec3(1.0f, 1.0f, 1.0f);
+	laser.ambient = glm::vec3(1.0f, 0.0f, 0.0f);
+	laser.diffuse = glm::vec3(1.0f, 0.0f, 0.0f);
+	laser.specular = glm::vec3(1.0f, 0.0f, 0.0f);
+	laser.emission = glm::vec3(1.0f, 0.0f, 0.0f);
 	laser.shininess = 1.0f;
 
 	if (!bg.openFromFile("music/big_rock.ogg"))
@@ -170,55 +170,72 @@ int main()
 			// Weapons
 			if (event.key.code == sf::Mouse::Right)
 			{
-				laser_sfx.stop();
-				laser_sfx.play();
-				const int frames = 10;
-				glm::vec3 p;
-				
-				// check if laser ray hit something
-				for (auto& t : enemy_tanks)
+				if (laser_frames == 0)
 				{
-					p = t->HitLaser(tonk->center, tonk->dir);
-					if (tonk->center != p)
-					{
-						t->hit = true;
-						goto zap_end;
-					}
-				}
+					laser_sfx.stop();
+					laser_sfx.play();
+					const int frames = 10;
+					glm::vec3 p;
 
-				for (auto& b : barrels)
-				{
-					p = b->HitLaser(tonk->center, tonk->dir);
-					if (tonk->center != p)
+					// check if laser ray hit something
+					for (auto& t : enemy_tanks)
 					{
-						b->hit = true;
-						goto zap_end;
+						if (!t->hit)
+						{
+							p = t->HitLaser(tonk->center, tonk->dir);
+							if (p != tonk->center)
+							{
+								t->hit = true;
+								goto zap_end;
+							}
+						}
 					}
-				}
-				
-				for (auto& t : trees)
-				{
-					p = t->HitLaser(tonk->center, tonk->dir);
-					if (tonk->center != p)
+
+					for (auto& b : barrels)
 					{
-						t->hit = true;
-						goto zap_end;
+						if (!b->hit)
+						{
+							p = b->HitLaser(tonk->center, tonk->dir);
+							if (p != tonk->center)
+							{
+								b->hit = true;
+								goto zap_end;
+							}
+						}
 					}
-				}
-				
-				for (auto& r : rocks)
-				{
-					p = r->HitLaser(tonk->center, tonk->dir);
-					if (tonk->center != p)
+
+					for (auto& t : trees)
 					{
-						r->hit = true;
-						goto zap_end;
+						if (!t->hit)
+						{
+							p = t->HitLaser(tonk->center, tonk->dir);
+							if (p != tonk->center)
+							{
+								t->hit = true;
+								goto zap_end;
+							}
+						}
 					}
+
+					for (auto& r : rocks)
+					{
+						if (!r->hit)
+						{
+							p = r->HitLaser(tonk->center, tonk->dir);
+							if (p != tonk->center)
+							{
+								r->hit = true;
+								goto zap_end;
+							}
+						}
+					}
+					// if there is no hit, then p is point on same line as tonk->center and tonk->dir 1000 units away
+					p = tonk->center + -tonk->dir.xyz() * 1000.0f;
+				zap_end:
+					laser_frames = frames;
+					zap(tonk->center, p);
+					cout << endl;
 				}
-				p = tonk->center + -tonk->dir.xyz() * 1000.0f;
-			zap_end:
-				laser_frames = frames;
-				zap(tonk->center, p);
 			}
 		}
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // Очищаем буфер цвета и буфер глубины
