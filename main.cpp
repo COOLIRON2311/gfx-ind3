@@ -166,6 +166,30 @@ int main()
 				{
 					sl.enabled = !sl.enabled;
 				}
+
+				// Reset
+				if (event.key.code == sf::Keyboard::Escape)
+				{
+					for (auto& t : enemy_tanks)
+					{
+						t->hit = false;
+					}
+
+					for (auto& b : barrels)
+					{
+						b->hit = false;
+					}
+
+					for (auto& t : trees)
+					{
+						t->hit = false;
+					}
+
+					for (auto& r : rocks)
+					{
+						r->hit = false;
+					}
+				}
 			}
 			// Weapons
 			if (event.key.code == sf::Mouse::Right)
