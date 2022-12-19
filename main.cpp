@@ -379,6 +379,7 @@ void InitTextures()
 	LoadTexture(GL_TEXTURE4, textures[4], "textures/Tree.png");
 	LoadTexture(GL_TEXTURE5, textures[5], "textures/Stone.png");
 	LoadTexture(GL_TEXTURE6, textures[6], "textures/EnTank.png");
+	LoadTexture(GL_TEXTURE7, textures[7], "textures/laser.jpg");
 }
 
 void LoadAttrib(GLuint prog, GLint& attrib, const char* attr_name)
@@ -531,7 +532,7 @@ void Draw(sf::Window& window)
 		laser.Load(Programs[0]);
 		glUniformMatrix4fv(Phong_mvp, 1, GL_FALSE, glm::value_ptr(cam.MVP()));
 		glUniform3fv(Phong_viewPos, 1, glm::value_ptr(cam.Pos));
-		glUniform1i(tex_loc, 2);
+		glUniform1i(tex_loc, 7);
 		glEnableVertexAttribArray(Phong_coord);
 		glEnableVertexAttribArray(Phong_texcoord);
 		glEnableVertexAttribArray(Phong_normal);

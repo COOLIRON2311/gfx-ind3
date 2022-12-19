@@ -37,7 +37,7 @@ bool music_playing;
 // Stuff
 vector<Object> objects;
 array<GLuint, 1> Programs;
-array<GLuint, 7> textures;
+array<GLuint, 8> textures;
 vector<Object*> enemy_tanks;
 vector<Object*> trees;
 vector<Object*> rocks;
