@@ -192,3 +192,32 @@ void zap(const glm::vec3 a, const glm::vec3 b)
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	
 }
+
+void update_bullet()
+{
+	float x = 0.0f;
+	float y = 0.0f;
+	float z = 0.0f;
+	glm::mat4 model = glm::mat4(1.0f);
+	model = glm::translate(model, glm::vec3(bul_dir.x * bul_speed, 0.0f, bul_dir.z * bul_speed));
+	for (int i = 0; i < bullet->size(); i++)
+	{
+		glm::vec4 v = glm::vec4(bullet->vertices[i].x, bullet->vertices[i].y, bullet->vertices[i].z, 1.0f);
+		v = model * v;
+		bullet->vertices[i].x = v.x;
+		bullet->vertices[i].y = v.y;
+		bullet->vertices[i].z = v.z;
+		x += v.x;
+		y += v.y;
+		z += v.z;
+	}
+	glBindBuffer(GL_ARRAY_BUFFER, bullet->id);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * bullet->size(), &bullet->vertices[0], GL_STATIC_DRAW);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	checkOpenGLerror();
+	x /= bullet->size();
+	y /= bullet->size();
+	z /= bullet->size();
+	bullet->center = glm::vec3(x, y, z);
+	pl.pos = bullet->center;
+}
