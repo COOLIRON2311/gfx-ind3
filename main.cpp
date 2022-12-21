@@ -314,6 +314,8 @@ int main()
 			{
 				bullet_fired = false;
 				pl.enabled = false;
+				bullet->destroy();
+				delete bullet;
 			}
 			else
 			{
@@ -329,6 +331,8 @@ int main()
 							t->hit = true;
 							bullet_fired = false;
 							pl.enabled = false;
+							bullet->destroy();
+							delete bullet;
 							break;
 						}
 					}
@@ -343,6 +347,8 @@ int main()
 							b->hit = true;
 							bullet_fired = false;
 							pl.enabled = false;
+							bullet->destroy();
+							delete bullet;
 							break;
 						}
 					}
@@ -357,6 +363,8 @@ int main()
 							t->hit = true;
 							bullet_fired = false;
 							pl.enabled = false;
+							bullet->destroy();
+							delete bullet;
 							break;
 						}
 					}
@@ -371,6 +379,8 @@ int main()
 							r->hit = true;
 							bullet_fired = false;
 							pl.enabled = false;
+							bullet->destroy();
+							delete bullet;
 							break;
 						}
 					}

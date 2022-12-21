@@ -69,8 +69,8 @@ Object* bullet;
 bool bullet_fired;
 // glm::vec3 bul_origin;
 glm::vec3 bul_dir;
-const float bul_speed = 0.8f;
-const float bul_max_dst = 100.0f;
+const float bul_speed = 1.0f;
+const float bul_max_dst = 50.0f;
 
 // Функция для установки иконки приложения
 void SetIcon(sf::Window& wnd);
