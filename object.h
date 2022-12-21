@@ -37,9 +37,13 @@ void checkOpenGLerror();
 class Object
 {
 protected:
-	const float R = 1.0f;
+	const float RL = 1.0f; // laser collider radius
+	const float RB = 1.0f; // bullet collider radius
 	void ApplyTransform()
 	{
+		float x = 0.0f;
+		float y = 0.0f;
+		float z = 0.0f;
 		glm::mat4 model = glm::mat4(1.0f);
 		model = glm::rotate(model, glm::radians(ry), glm::vec3(0.0f, 1.0f, 0.0f));
 		model = glm::translate(model, glm::vec3(dx, 0.0f, dz));
@@ -50,28 +54,16 @@ protected:
 			vertices[i].x = v.x;
 			vertices[i].y = v.y;
 			vertices[i].z = v.z;
+			
+			x += vertices[i].x;
+			y += vertices[i].y;
+			z += vertices[i].z;
 		}
 		glBindBuffer(GL_ARRAY_BUFFER, id);
 		glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * size(), &vertices[0], GL_STATIC_DRAW);
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 		checkOpenGLerror();
-	}
-
-	void setCenter()
-	{
-		float x = 0.0f;
-		float y = 0.0f;
-		float z = 0.0f;
-		for (int i = 0; i < vertices.size(); i++)
-		{
-			x += vertices[i].x;
-			y += vertices[i].y;
-			z += vertices[i].z;
-		}
-		x /= vertices.size();
-		y /= vertices.size();
-		z /= vertices.size();
-		center = glm::vec3(x, y, z);
+		center = glm::vec3(x, y, z) / (float)size();
 	}
 
 public:
@@ -92,7 +84,6 @@ public:
 		hit = false;
 		this->vertices = vertices;
 		ApplyTransform();
-		setCenter();
 	}
 
 	size_t size()
@@ -110,12 +101,11 @@ public:
 	void Update()
 	{
 		ApplyTransform();
-		setCenter();
 	}
 
 	bool HitBullet(const glm::vec3& bulletPos)
 	{
-		if (glm::distance(center, bulletPos) < R)
+		if (glm::distance(center, bulletPos) < RB)
 			return true;
 		return false;
 	}
@@ -126,7 +116,7 @@ public:
 		glm::vec3 T = pos - center; // вектор от центра объекта до точки попадания лазера
 		float A = 1.0f; // коэффициент A квадратичного уравнения
 		float B = 2.0f * glm::dot(T, d); // коэффициент B квадратичного уравнения
-		float C = glm::dot(T, T) - R * R; // коэффициент C квадратичного уравнения
+		float C = glm::dot(T, T) - RL * RL; // коэффициент C квадратичного уравнения
 		float delta = B * B - 4.0f * A * C; // дискриминант квадратичного уравнения
 		float dist = inf; // расстояние до точки попадания лазера
 		glm::vec3 hit_pos = glm::vec3(0.0f);
@@ -144,7 +134,7 @@ public:
 				T = new_pos - center; // вычисляем новый вектор от центра объекта до точки попадания лазера
 				A = 1.0f; // коэффициент A квадратичного уравнения
 				B = 2.0f * glm::dot(T, d); // коэффициент B квадратичного уравнения
-				C = glm::dot(T, T) - R * R; // коэффициент C квадратичного уравнения
+				C = glm::dot(T, T) - RL * RL; // коэффициент C квадратичного уравнения
 				delta = B * B - 4.0f * A * C; // дискриминант квадратичного уравнения
 				if (delta > 0) // если дискриминант больше нуля, то есть два корня
 				{
@@ -185,16 +175,13 @@ class PlayerTank
 		float x = 0.0f;
 		float y = 0.0f;
 		float z = 0.0f;
-		for (int i = 0; i < vertices.size(); i++)
+		for (int i = 0; i < size(); i++)
 		{
 			x += vertices[i].x;
 			y += vertices[i].y;
 			z += vertices[i].z;
 		}
-		x /= vertices.size();
-		y /= vertices.size();
-		z /= vertices.size();
-		center = glm::vec3(x, y, z);
+		center = glm::vec3(x, y, z) / (float)size();
 	}
 
 public:
@@ -228,14 +215,12 @@ public:
 	{
 		dz = -1.0f;
 		Move();
-		setCenter();
 	}
 
 	void MoveBackward()
 	{
 		dz = 1.0f;
 		Move();
-		setCenter();
 	}
 
 	void RotateLeft()
@@ -252,6 +237,9 @@ public:
 
 	void Move()
 	{
+		float x = 0.0f;
+		float y = 0.0f;
+		float z = 0.0f;
 		glm::mat4 model = glm::mat4(1.0f);
 		model = glm::translate(model, glm::vec3(speed * dir.x * dz, 0.0f, speed * dir.z * dz));
 		for (int i = 0; i < size(); i++)
@@ -261,11 +249,16 @@ public:
 			vertices[i].x = v.x;
 			vertices[i].y = v.y;
 			vertices[i].z = v.z;
+
+			x += vertices[i].x;
+			y += vertices[i].y;
+			z += vertices[i].z;
 		}
 		glBindBuffer(GL_ARRAY_BUFFER, id);
 		glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * size(), &vertices[0], GL_STATIC_DRAW);
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 		checkOpenGLerror();
+		center = glm::vec3(x, y, z) / (float)size();
 	}
 	
 	void Rotate()

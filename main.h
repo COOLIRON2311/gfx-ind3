@@ -58,12 +58,13 @@ SpotLight sl;
 Material mat;
 
 // Laser
-Material projectile;
+Material laser_mat;
 sf::Music laser_sfx;
 GLuint laser_vbo;
 int laser_frames;
 
 // Bullet
+Material bullet_mat;
 sf::Music bullet_sfx;
 Object* bullet;
 bool bullet_fired;
@@ -215,9 +216,6 @@ void update_bullet()
 	glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * bullet->size(), &bullet->vertices[0], GL_STATIC_DRAW);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	checkOpenGLerror();
-	x /= bullet->size();
-	y /= bullet->size();
-	z /= bullet->size();
-	bullet->center = glm::vec3(x, y, z);
+	bullet->center = glm::vec3(x, y, z) / (float)bullet->size();
 	pl.pos = bullet->center;
 }

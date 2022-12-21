@@ -35,11 +35,18 @@ void Init()
 	mat.shininess = 1.0f;
 
 	// Laser
-	projectile.ambient = glm::vec3(1.0f, 0.0f, 0.0f);
-	projectile.diffuse = glm::vec3(1.0f, 0.0f, 0.0f);
-	projectile.specular = glm::vec3(1.0f, 0.0f, 0.0f);
-	projectile.emission = glm::vec3(1.0f, 0.0f, 0.0f);
-	projectile.shininess = 1.0f;
+	laser_mat.ambient = glm::vec3(1.0f, 0.0f, 0.0f);
+	laser_mat.diffuse = glm::vec3(1.0f, 0.0f, 0.0f);
+	laser_mat.specular = glm::vec3(1.0f, 0.0f, 0.0f);
+	laser_mat.emission = glm::vec3(1.0f, 0.0f, 0.0f);
+	laser_mat.shininess = 1.0f;
+
+	// Bullet
+	bullet_mat.ambient = glm::vec3(1.0f, 1.0f, 1.0f);
+	bullet_mat.diffuse = glm::vec3(1.0f, 1.0f, 1.0f);
+	bullet_mat.specular = glm::vec3(1.0f, 1.0f, 1.0f);
+	bullet_mat.emission = glm::vec3(1.0f, 1.0f, 1.0f);
+	bullet_mat.shininess = 1.0f;
 
 	if (!bg.openFromFile("music/big_rock.ogg"))
 	{
@@ -651,7 +658,7 @@ void Draw(sf::Window& window)
 		pl.Load(Programs[0]);
 		dl.Load(Programs[0]);
 		sl.Load(Programs[0]);
-		projectile.Load(Programs[0]);
+		laser_mat.Load(Programs[0]);
 		glUniformMatrix4fv(Phong_mvp, 1, GL_FALSE, glm::value_ptr(cam.MVP()));
 		glUniform3fv(Phong_viewPos, 1, glm::value_ptr(cam.Pos));
 		glUniform1i(tex_loc, 7);
@@ -678,7 +685,7 @@ void Draw(sf::Window& window)
 		pl.Load(Programs[0]);
 		dl.Load(Programs[0]);
 		sl.Load(Programs[0]);
-		projectile.Load(Programs[0]);
+		bullet_mat.Load(Programs[0]);
 		glUniformMatrix4fv(Phong_mvp, 1, GL_FALSE, glm::value_ptr(cam.MVP()));
 		glUniform3fv(Phong_viewPos, 1, glm::value_ptr(cam.Pos));
 		glUniform1i(tex_loc, 8);
