@@ -4,17 +4,18 @@
 void Init()
 {
 	// Point light
+	pl.enabled = false;
 	pl.pos = glm::vec3(-3.12f, 8.27f, -2.83f);
 	pl.ambient = glm::vec3(0.1f);
-	pl.diffuse = glm::vec3(1.0f);
-	pl.specular = glm::vec3(1.0f);
-	pl.atten = glm::vec3(0.2f);
+	pl.diffuse = glm::vec3(0.8f);
+	pl.specular = glm::vec3(0.8f);
+	pl.atten = glm::vec3(0.5f);
 
 	// Directional light
 	dl.direction = glm::vec3(0.0f, -1.0f, 0.0f);
-	dl.ambient = glm::vec3(0.5f);
-	dl.diffuse = glm::vec3(0.5f);
-	dl.specular = glm::vec3(0.5f);
+	dl.ambient = glm::vec3(1.0f);
+	dl.diffuse = glm::vec3(1.0f);
+	dl.specular = glm::vec3(1.0f);
 
 	// Spot light
 	sl.enabled = false;
@@ -34,11 +35,11 @@ void Init()
 	mat.shininess = 1.0f;
 
 	// Laser
-	laser.ambient = glm::vec3(1.0f, 0.0f, 0.0f);
-	laser.diffuse = glm::vec3(1.0f, 0.0f, 0.0f);
-	laser.specular = glm::vec3(1.0f, 0.0f, 0.0f);
-	laser.emission = glm::vec3(1.0f, 0.0f, 0.0f);
-	laser.shininess = 1.0f;
+	projectile.ambient = glm::vec3(1.0f, 0.0f, 0.0f);
+	projectile.diffuse = glm::vec3(1.0f, 0.0f, 0.0f);
+	projectile.specular = glm::vec3(1.0f, 0.0f, 0.0f);
+	projectile.emission = glm::vec3(1.0f, 0.0f, 0.0f);
+	projectile.shininess = 1.0f;
 
 	if (!bg.openFromFile("music/big_rock.ogg"))
 	{
@@ -53,6 +54,8 @@ void Init()
 	}
 
 	laser_sfx.openFromFile("music/laser.ogg");
+	bullet_sfx.openFromFile("music/bullet.ogg");
+	bullet_fired = false;
 
 	//Включаем проверку глубины
 	glEnable(GL_DEPTH_TEST);
@@ -61,6 +64,35 @@ void Init()
 	// Инициализируем вершинный буфер
 	InitVBO();
 	InitTextures();
+}
+
+void UpdateBullet()
+{
+	float x = 0.0f;
+	float y = 0.0f;
+	float z = 0.0f;
+	glm::mat4 model = glm::mat4(1.0f);
+	model = glm::translate(model, glm::vec3(bul_dir.x * bul_speed, 0.0f, bul_dir.z * bul_speed));
+	for (int i = 0; i < bullet->size(); i++)
+	{
+		glm::vec4 v = glm::vec4(bullet->vertices[i].x, bullet->vertices[i].y, bullet->vertices[i].z, 1.0f);
+		v = model * v;
+		bullet->vertices[i].x = v.x;
+		bullet->vertices[i].y = v.y;
+		bullet->vertices[i].z = v.z;
+		x += v.x;
+		y += v.y;
+		z += v.z;
+	}
+	glBindBuffer(GL_ARRAY_BUFFER, bullet->id);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * bullet->size(), &bullet->vertices[0], GL_STATIC_DRAW);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	checkOpenGLerror();
+	x /= bullet->size();
+	y /= bullet->size();
+	z /= bullet->size();
+	bullet->center = glm::vec3(x, y, z);
+	pl.pos = bullet->center;
 }
 
 int main()
@@ -150,7 +182,7 @@ int main()
 				{
 					sl.Config();
 				}
-				
+
 				// Music
 				if (event.key.code == sf::Keyboard::M)
 				{
@@ -171,29 +203,22 @@ int main()
 				if (event.key.code == sf::Keyboard::Escape)
 				{
 					for (auto& t : enemy_tanks)
-					{
 						t->hit = false;
-					}
 
 					for (auto& b : barrels)
-					{
 						b->hit = false;
-					}
 
 					for (auto& t : trees)
-					{
 						t->hit = false;
-					}
 
 					for (auto& r : rocks)
-					{
 						r->hit = false;
-					}
 				}
 			}
 			// Weapons
-			if (event.key.code == sf::Mouse::Right)
+			if (sf::Mouse::isButtonPressed(sf::Mouse::Right))
 			{
+				// Laser
 				if (laser_frames == 0)
 				{
 					laser_sfx.stop();
@@ -258,10 +283,101 @@ int main()
 				zap_end:
 					laser_frames = frames;
 					zap(tonk->center, p);
-					cout << endl;
+					// cout << endl;
+				}
+			}
+			
+			// Bullet
+			if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
+			{
+				if (!bullet_fired)
+				{
+					bullet = objects[6].copy();
+					bullet_sfx.stop();
+					bullet_sfx.play();
+					// Bullet
+					pl.enabled = true;
+					pl.pos = tonk->center;
+
+					bullet_fired = true;
+					bullet->dx = tonk->center.x;
+					bullet->dz = tonk->center.z;
+					bul_dir = -tonk->dir;
+					bullet->Update();
 				}
 			}
 		}
+		
+		if (bullet_fired)
+		{
+			if (glm::distance(bullet->center, tonk->center) > bul_max_dst)
+			{
+				bullet_fired = false;
+				pl.enabled = false;
+			}
+			else
+			{
+				UpdateBullet();
+				
+				// check if bullet hit something
+				for (auto& t : enemy_tanks)
+				{
+					if (!t->hit)
+					{
+						if (t->HitBullet(bullet->center))
+						{
+							t->hit = true;
+							bullet_fired = false;
+							pl.enabled = false;
+							break;
+						}
+					}
+				}
+
+				for (auto& b : barrels)
+				{
+					if (!b->hit)
+					{
+						if (b->HitBullet(bullet->center))
+						{
+							b->hit = true;
+							bullet_fired = false;
+							pl.enabled = false;
+							break;
+						}
+					}
+				}
+
+				for (auto& t : trees)
+				{
+					if (!t->hit)
+					{
+						if (t->HitBullet(bullet->center))
+						{
+							t->hit = true;
+							bullet_fired = false;
+							pl.enabled = false;
+							break;
+						}
+					}
+				}
+
+				for (auto& r : rocks)
+				{
+					if (!r->hit)
+					{
+						if (r->HitBullet(bullet->center))
+						{
+							r->hit = true;
+							bullet_fired = false;
+							pl.enabled = false;
+							break;
+						}
+					}
+				}
+			}
+		}
+		
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // Очищаем буфер цвета и буфер глубины
 		Draw(window); // Рисуем
 		window.display(); // Выводим на экран
@@ -322,7 +438,6 @@ bool intersects(Object* obj)
 	}
 
 	return false;
-
 }
 
 void InitVBO()
@@ -334,6 +449,7 @@ void InitVBO()
 	LoadObject(3, "models/Barrel.obj");
 	LoadObject(4, "models/Tree.obj");
 	LoadObject(5, "models/Stone.obj");
+	LoadObject(6, "models/Bullet.obj");
 	// Player tank
 	tonk = new PlayerTank(objects[1]);
 	sl.pos = tonk->center;
@@ -404,6 +520,7 @@ void InitTextures()
 	LoadTexture(GL_TEXTURE5, textures[5], "textures/Stone.png");
 	LoadTexture(GL_TEXTURE6, textures[6], "textures/EnTank.png");
 	LoadTexture(GL_TEXTURE7, textures[7], "textures/laser.jpg");
+	LoadTexture(GL_TEXTURE8, textures[8], "textures/bullet.jpg");
 }
 
 void LoadAttrib(GLuint prog, GLint& attrib, const char* attr_name)
@@ -553,7 +670,7 @@ void Draw(sf::Window& window)
 		pl.Load(Programs[0]);
 		dl.Load(Programs[0]);
 		sl.Load(Programs[0]);
-		laser.Load(Programs[0]);
+		projectile.Load(Programs[0]);
 		glUniformMatrix4fv(Phong_mvp, 1, GL_FALSE, glm::value_ptr(cam.MVP()));
 		glUniform3fv(Phong_viewPos, 1, glm::value_ptr(cam.Pos));
 		glUniform1i(tex_loc, 7);
@@ -566,6 +683,33 @@ void Draw(sf::Window& window)
 		glVertexAttribPointer(Phong_normal, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)(5 * sizeof(GLfloat)));
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 		glDrawArrays(GL_LINES, 0, 2);
+		glDisableVertexAttribArray(Phong_coord);
+		glDisableVertexAttribArray(Phong_texcoord);
+		glDisableVertexAttribArray(Phong_normal);
+		glUseProgram(0); // Отключаем шейдерную программу
+	}
+
+	// Bullet
+	if (bullet_fired)
+	{
+		glUseProgram(Programs[0]);
+		tex_loc = glGetUniformLocation(Programs[0], "tex");
+		pl.Load(Programs[0]);
+		dl.Load(Programs[0]);
+		sl.Load(Programs[0]);
+		projectile.Load(Programs[0]);
+		glUniformMatrix4fv(Phong_mvp, 1, GL_FALSE, glm::value_ptr(cam.MVP()));
+		glUniform3fv(Phong_viewPos, 1, glm::value_ptr(cam.Pos));
+		glUniform1i(tex_loc, 8);
+		glEnableVertexAttribArray(Phong_coord);
+		glEnableVertexAttribArray(Phong_texcoord);
+		glEnableVertexAttribArray(Phong_normal);
+		glBindBuffer(GL_ARRAY_BUFFER, bullet->id);
+		glVertexAttribPointer(Phong_coord, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)0);
+		glVertexAttribPointer(Phong_texcoord, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
+		glVertexAttribPointer(Phong_normal, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)(5 * sizeof(GLfloat)));
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		glDrawArrays(GL_TRIANGLES, 0, bullet->size());
 		glDisableVertexAttribArray(Phong_coord);
 		glDisableVertexAttribArray(Phong_texcoord);
 		glDisableVertexAttribArray(Phong_normal);

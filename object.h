@@ -113,12 +113,11 @@ public:
 		setCenter();
 	}
 
-	void HitBullet(const glm::vec3& bulletPos)
+	bool HitBullet(const glm::vec3& bulletPos)
 	{
 		if (glm::distance(center, bulletPos) < R)
-		{
-			hit = true;
-		}
+			return true;
+		return false;
 	}
 
 	glm::vec3 HitLaser(const glm::vec3 pos, const glm::vec3 d)
@@ -165,7 +164,7 @@ public:
 
 			}
 		}
-		cout << "pos: " << pos << ", d: " << d << ", dist: " << dist << ", hit_pos: " << hit_pos << endl;
+		// cout << "pos: " << pos << ", d: " << d << ", dist: " << dist << ", hit_pos: " << hit_pos << endl;
 		if (dist < inf)
 			return hit_pos; // возвращаем точку попадания лазера
 		else

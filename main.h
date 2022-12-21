@@ -37,7 +37,7 @@ bool music_playing;
 // Stuff
 vector<Object> objects;
 array<GLuint, 1> Programs;
-array<GLuint, 8> textures;
+array<GLuint, 9> textures;
 vector<Object*> enemy_tanks;
 vector<Object*> trees;
 vector<Object*> rocks;
@@ -58,10 +58,19 @@ SpotLight sl;
 Material mat;
 
 // Laser
-Material laser;
+Material projectile;
 sf::Music laser_sfx;
 GLuint laser_vbo;
 int laser_frames;
+
+// Bullet
+sf::Music bullet_sfx;
+Object* bullet;
+bool bullet_fired;
+// glm::vec3 bul_origin;
+glm::vec3 bul_dir;
+const float bul_speed = 0.8f;
+const float bul_max_dst = 100.0f;
 
 // Функция для установки иконки приложения
 void SetIcon(sf::Window& wnd);

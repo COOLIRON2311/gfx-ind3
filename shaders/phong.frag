@@ -4,6 +4,7 @@ in vec2 uv;
 in vec3 norm;
 
 uniform struct PointLight {
+    bool enabled;
     vec3 pos;
     vec3 ambient;
     vec3 diffuse;
@@ -59,10 +60,14 @@ void main()
     vec3 spec = pow(RdotV, material.shininess) * pointl.specular * material.specular;
     vec3 diff = NdotL * material.diffuse * pointl.diffuse;
 
-    vec3 r1 = material.emission;
-    r1 += material.ambient * pointl.ambient * atten; // ambient
-    r1 += spec * atten; // specular
-    r1 += diff * atten; // diffuse
+    vec3 r1 = vec3(0.0f);
+    if (pointl.enabled)
+    {
+        r1 += material.emission;
+        r1 += material.ambient * pointl.ambient * atten; // ambient
+        r1 += spec * atten; // specular
+        r1 += diff * atten; // diffuse
+    }
 
 
     // =================
