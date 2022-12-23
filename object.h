@@ -156,7 +156,14 @@ public:
 		}
 		// cout << "pos: " << pos << ", d: " << d << ", dist: " << dist << ", hit_pos: " << hit_pos << endl;
 		if (dist < inf)
-			return hit_pos; // возвращаем точку попадания лазера
+		{
+			if (glm::dot(hit_pos - pos, -d) < 0.0f)
+			{
+				return pos;
+			}
+			else
+				return hit_pos; // возвращаем точку попадания лазера
+		}
 		else
 			return pos; // если луч не попал в объект, то возвращаем исходную позицию
 	}
